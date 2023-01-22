@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from .jwt import get_token_for_user
 from .models import UserCompanyExtend, UserInfluExtend, Basket
 from .serializers import (UserInfluSerializer, UserCompanySerializer, UserLoginSerializer, UserInfluListSerializer,
-                          ContactSerializer, BasketSerializer, UserDasboardSerializer)
+                          ContactSerializer, BasketSerializer, UserDasboardSerializer, ContactUsSerializer)
 
 
 class UserCompanyCreateView(APIView):
@@ -123,3 +123,10 @@ class DashboardView(IsAuthenticated, APIView):
             return Response(data=sr.data, status=status.HTTP_200_OK)
 
 
+class ContactUsCreateView(APIView):
+    class_serializer = ContactUsSerializer
+
+    def post(self, request):
+        sr = self.class_serializer(data=request.data)
+        if sr.is_valid(raise_exception=True):
+            return Response(data=sr.data, status=status.HTTP_201_CREATED)

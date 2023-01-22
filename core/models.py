@@ -41,3 +41,10 @@ class Basket(models.Model):
 
     def __str__(self):
         return f'{self.price}'
+
+
+class ContactUs(models.Model):
+    message = models.TextField()
+
+    def __str__(self):
+        return f'contact us {self.id}'

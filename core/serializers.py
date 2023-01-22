@@ -2,9 +2,8 @@ from django.contrib.auth import authenticate
 from django.db.models import Q
 
 from rest_framework import serializers
-from rest_framework.response import Response
 
-from .models import UserCompanyExtend, UserInfluExtend, Contact, Basket
+from .models import UserCompanyExtend, UserInfluExtend, Contact, Basket, ContactUs
 from .jwt import get_token_for_user
 
 
@@ -96,3 +95,10 @@ class UserDasboardSerializer(serializers.Serializer):
     def get_orders(self, obj):
         baskets = Basket.objects.filter(Q(company__fullname=obj.fullname) | Q(influ__fullname=obj.fullname))
         return BasketListSerializer(instance=baskets, many=True).data
+
+
+class ContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = '__all__'
+
