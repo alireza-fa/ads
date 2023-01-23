@@ -37,12 +37,14 @@ class UserInfluCreateView(APIView):
     serializer_class = UserInfluSerializer
 
     def post(self, request):
-        sr = self.serializer_class(data=self.request.data)
+        sr = self.serializer_class(data=self.request.data, context={"request": request})
         if sr.is_valid():
             sr_data = sr.validated_data
             row = self.model(
                 fullname=sr_data['fullname'], phone_number=sr_data['phone_number'], page_id=sr_data['page_id'],
-                follower_count=sr_data['follower_count'])
+                follower_count=sr_data['follower_count'], image=sr_data['image'], category=sr_data['category'],
+                price=sr_data['price']
+            )
             try:
                 user = User.objects.create_user(
                     username=sr_data['fullname'], password=sr_data['password']
@@ -95,13 +97,14 @@ class PaymentDetailView(APIView):
         return Response(sr_data.data, status=status.HTTP_200_OK)
 
 
-class PaymentBuyView(IsAuthenticated, APIView):
+class PaymentBuyView(APIView):
     class_serializer = BasketSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, influ_id):
-        influ = get_object_or_404(UserInfluExtend, id=influ_id)
-        basket = Basket(influ=influ, price='22000', is_paid=True)
-        user_company = UserCompanyExtend.objects.filter(user=request.user.id)
+        user_influ = get_object_or_404(User, influ__id=influ_id)
+        basket = Basket(influ=user_influ, price=user_influ.influ.price, is_paid=True)
+        user_company = User.objects.filter(id=request.user.id)
         if user_company.exists():
             basket.company = user_company.first()
         basket.save()
@@ -109,8 +112,9 @@ class PaymentBuyView(IsAuthenticated, APIView):
         return Response(data=sr.data, status=status.HTTP_200_OK)
 
 
-class DashboardView(IsAuthenticated, APIView):
+class DashboardView(APIView):
     class_serializer = UserDasboardSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         company = UserCompanyExtend.objects.filter(user=request.user.id)
@@ -129,4 +133,5 @@ class ContactUsCreateView(APIView):
     def post(self, request):
         sr = self.class_serializer(data=request.data)
         if sr.is_valid(raise_exception=True):
+            sr.save()
             return Response(data=sr.data, status=status.HTTP_201_CREATED)
