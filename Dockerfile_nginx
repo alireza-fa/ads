@@ -1,0 +1,6 @@
+FROM nginx:1.23
+LABEL MAINTAINER="alireza-fa"
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
